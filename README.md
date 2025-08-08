@@ -29,7 +29,7 @@ The model will be trained to recognize the following cloud types:
 ## 🛠 Planned Features
 - 📷 **Dataset expansion** – Using contributor photographs  
 - 🧠 **Multiple model versions**:
-  - V1: Initial model (minimal viable dataset)  
+- V1: Initial model (minimal viable dataset)  
 - 🔍 **Image classification API** for integrations  
 - 🌐 **Interactive web demo**  
 - 📊 **Model evaluation tools**  
