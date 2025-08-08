@@ -1,5 +1,9 @@
 # CCAiM – Cloud Classification AI Model
 
+<div align="center">
+  <img src="assets/logo.jpg" alt="CCAiM logo" width="200">
+</din>
+ 
 ## 📌 Project Status
 
 Currently in the dataset collection phase.
