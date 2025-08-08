@@ -24,9 +24,9 @@ The model will be trained to recognize the following cloud types:
  10. Cumulonimbus (Cb) – Towering clouds associated with thunderstorms.
 
 ## 🛠 Planned Features
- • 📷 Dataset expansion – using photographs taken by the project team and contributors.
- • 🧠 Multiple model versions:
- • V1 First model version be creted when so so mini data set was colletc.
- • 🔍 Image classification API for integration into other applications.
- • 🌐 Interactive web demo to test the model online.
- • 📊 Model evaluation tools for accuracy and performance metrics.
+ - 📷 Dataset expansion – using photographs taken by the project team and contributors.
+ - 🧠 Multiple model versions:
+ - V1 First model version be creted when so so mini data set was colletc.
+ - 🔍 Image classification API for integration into other applications.
+ - 🌐 Interactive web demo to test the model online.
+ - 📊 Model evaluation tools for accuracy and performance metrics.
