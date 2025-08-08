@@ -1,15 +1,15 @@
-#CCAiM – Cloud Classification AI Model
+# CCAiM – Cloud Classification AI Model
 
-##📌 Project Status
+## 📌 Project Status
 
 Currently in the dataset collection phase.
 
-##🎯 Project Goal
+## 🎯 Project Goal
 
 CCAiM aims to develop an AI-powered model for classifying clouds based on ground-level photographs.
 The project uses image recognition techniques to identify cloud types according to the WMO International Cloud Atlas (https://en.wikipedia.org/wiki/International_Cloud_Atlas) classification.
 
-##☁️ Target Cloud Classes
+## ☁️ Target Cloud Classes
 
 The model will be trained to recognize the following cloud types:
  1. Cirrus (Ci) – Thin, wispy clouds high in the sky.
@@ -23,7 +23,7 @@ The model will be trained to recognize the following cloud types:
  9. Cumulus (Cu) – Fluffy, white clouds with flat bases.
  10. Cumulonimbus (Cb) – Towering clouds associated with thunderstorms.
 
-##🛠 Planned Features
+## 🛠 Planned Features
  • 📷 Dataset expansion – using photographs taken by the project team and contributors.
  • 🧠 Multiple model versions:
  • V1 First model version be creted when so so mini data set was colletc.
