@@ -27,9 +27,13 @@ The model will be trained to recognize the following cloud types:
 10. **Cumulonimbus (Cb)** – Towering thunderstorm clouds  
 
 ## 🛠 Planned Features
+### dreams
 - 📷 **Dataset expansion** – Using contributor photographs  
 - 🧠 **Multiple model versions**:
-- V1: Initial model (minimal viable dataset)  
+- V1: Initial first stabel model (minimal viable dataset)  
 - 🔍 **Image classification API** for integrations  
 - 🌐 **Interactive web demo**  
-- 📊 **Model evaluation tools**  
+- 📊 **Model evaluation tools**
+### now can
+- collect dataset
+- create first model V0.0.1
