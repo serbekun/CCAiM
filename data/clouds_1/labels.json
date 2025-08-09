@@ -1,12 +1,12 @@
 {
-    0: "Cirrocumulus"
-	1: "Altocumulus"
-	2: "Cirrocumulus"
-	3: "Cumulus"
-	4: "Cirrocumulus"
-	5: "Cirrocumulus"
-	6: "Cirrocumulus"
-	7: "Cirrus"
-	8: "Cirrus"
-	9: "Cirrus"
+    "0": "Cirrocumulus",
+	"1": "Altocumulus",
+	"2": "Cirrocumulus",
+	"3": "Cumulus",
+	"4": "Cirrocumulus",
+	"5": "Cirrocumulus",
+	"6": "Cirrocumulus",
+	"7": "Cirrus",
+	"8": "Cirrus",
+	"9": "Cirrus"
 }
