@@ -37,3 +37,6 @@ The model will be trained to recognize the following cloud types:
 ### now can
 - collect dataset
 - create first model V0.0.1
+
+## The most help contribute
+- if you found a discrepancy with the class written in json label and the image in the photos and correct this is the best contribution at the moment.
