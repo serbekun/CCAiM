@@ -1,6 +1,6 @@
 {
     "0": "Stratus",
-	"1": "Altostartus",
+	"1": "Altostratus",
 	"2": "Cumulus",
 	"3": "Altocumulus",
 	"4": "Altocumulus",
@@ -15,5 +15,11 @@
 	"13": "Altocumulus",
 	"14": "Stratus",
 	"15": "Cumulus",
-	"16": "Nimbostratus" 
+	"16": "Nimbostratus",
+	"17": "Stratus",
+	"18": "Stratus",
+	"19": "Stratus",
+	"20": "Cirrostratus",
+	"21": "Stratus",
+	"22": "Cirrostratus"
 }
