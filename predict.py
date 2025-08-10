@@ -11,6 +11,7 @@ from model import CCAiMModel  # model architecture
 
 # setting
 MODEL_PATH = "ccaim_model.pth"
+MODEL_PATH = "models/" + MODEL_PATH
 LABELS_JSON = "labels.json"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

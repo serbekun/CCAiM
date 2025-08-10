@@ -10,17 +10,18 @@ import os
 
 from model import CCAiMModel  # file with architecture
 
-# ==== setting ====
+# setting
 DATA_DIR = "data/clouds_1"
 LABELS_JSON = "labels.json"
 MODEL_PATH = "ccaim_model.pth"
+MODEL_PATH = "models/" + MODEL_PATH
 NUM_CLASSES = 10
 BATCH_SIZE = 16
 EPOCHS = 10
 LR = 0.001
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# ==== data set class ====
+# data set class
 class CloudDataset(Dataset):
     def __init__(self, data_dir, labels_json, transform=None):
         self.data_dir = data_dir
