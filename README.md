@@ -29,21 +29,21 @@ The model will be trained to recognize the following cloud types:
 ## 🛠 Planned Features
 
 dreams
- • 📷 Dataset expansion – Using contributor photographs
- • 🧠 Multiple model versions:
- • V1: Initial first stable model (minimal viable dataset)
- • 🔍 Image classification API for integrations
- • 🌐 Interactive web demo
- • 📊 Model evaluation tools
+ - 📷 Dataset expansion – Using contributor photographs
+ - 🧠 Multiple model versions:
+ - V1: Initial first stable model (minimal viable dataset)
+ - 🔍 Image classification API for integrations
+ - 🌐 Interactive web demo
+ - 📊 Model evaluation tools
 
 now can
- • collect dataset
- • create first model V0.0.1
+ - collect dataset
+ - create first model V0.0.1
 
 ## 📄 License Information
- • Code in this repository is licensed under the MIT License (see LICENSE).
- • Photographs located in folders named clouds_<dataset_number> are licensed under CC0 1.0 Universal (Public Domain), meaning they can be used freely for any purpose, including commercial use, without attribution.
- • If other datasets are added in the future, their license terms will be specified in a separate license file inside their respective folder.
+ - Code in this repository is licensed under the MIT License (see LICENSE).
+ - Photographs located in folders named clouds_<dataset_number> are licensed under CC0 1.0 Universal (Public Domain), meaning they can be used freely for any purpose, including commercial use, without attribution.
+ - If other datasets are added in the future, their license terms will be specified in a separate license file inside their respective folder.
 
 ## 🤝 How to Contribute
 
