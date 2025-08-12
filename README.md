@@ -45,6 +45,9 @@ now can
  - Photographs located in folders named clouds_<dataset_number> are licensed under CC0 1.0 Universal (Public Domain), meaning they can be used freely for any purpose, including commercial use, without attribution.
  - If other datasets are added in the future, their license terms will be specified in a separate license file inside their respective folder.
 
+## models
+- v_0.0.1   # first model lerned by 22 fhoto.
+
 ## 🤝 How to Contribute
 
 - The most helpful contribution at the moment:
