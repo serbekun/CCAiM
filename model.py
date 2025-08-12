@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 
-
 class ConvBlock(nn.Module):
     """Conv -> BN -> ReLU block (optionally with downsample via stride)."""
     def __init__(self, in_ch, out_ch, kernel_size=3, stride=1, padding=1):

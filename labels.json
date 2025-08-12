@@ -1,0 +1,12 @@
+{
+    "0": "Cirrus",
+    "1": "Cirrostratus",
+    "2": "Cirrocumulus",
+    "3": "Altostratus",
+    "4": "Altocumulus",
+    "5": "Stratus",
+    "6": "Stratocumulus",
+    "7": "Nimbostratus",
+    "8": "Cumulus",
+    "9": "Cumulonimbus"
+}
