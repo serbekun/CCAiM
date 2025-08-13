@@ -46,7 +46,7 @@ now can
  - If other datasets are added in the future, their license terms will be specified in a separate license file inside their respective folder.
 
 ## models
-- v_0.0.1   # first model lerned by 22 fhoto.
+- v_0.0.1   # first model learned by 22 photo.
 
 ## 🤝 How to Contribute
 

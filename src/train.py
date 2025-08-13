@@ -11,7 +11,7 @@ import os
 from model import CCAiMModel  # file with architecture
 
 # setting
-DATA_DIR = "data/clouds_1"
+DATA_DIR = "../data/clouds_1"
 LABELS_JSON = "labels.json"
 LABELS_JSON = DATA_DIR + "/" + LABELS_JSON
 MODEL_PATH = "CCAiM_V0_0_1.pth"
