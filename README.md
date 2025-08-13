@@ -10,7 +10,7 @@ Currently in the dataset collection phase.
 
 ## 🎯 Project Goal
 
-CCAiM aims to develop an AI-powered model for classifying clouds based on ground-level photographs. The project uses image recognition techniques to identify cloud types according to the WMO International Cloud Atlas classification (reference (https://en.wikipedia.org/wiki/International_Cloud_Atlas)).
+CCAiM aims to develop an AI-powered model for classifying clouds based on ground-level photographs. The project uses image recognition techniques to identify cloud types according to the [WMO International Cloud Atlas classification](https://en.wikipedia.org/wiki/International_Cloud_Atlas).
 
 ## ☁️ Target Cloud Classes
 
