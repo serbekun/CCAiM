@@ -52,8 +52,8 @@ now can
 ### All models exist in [hugging face](https://huggingface.co/serbekun/CCAiM)
 
 ### models list
-- v_0.0.1   # first model learned by 22 photo.
-- v_0.0.2   # second model lerned by 41 photo
+- v_0.0.1   # first model learned by 23 photo.
+- v_0.0.2   # second model lerned by 42 photo
 
 ## 🤝 How to Contribute
 
