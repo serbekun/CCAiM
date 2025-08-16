@@ -11,15 +11,14 @@ import os
 from model import CCAiMModel  # file with architecture
 
 # setting
-DATA_DIR = "../data/clouds_1"
+DATA_DIR = "../data/CCAiM-CloudsDataset/clouds_1"
 LABELS_JSON = "labels.json"
-LABELS_JSON = DATA_DIR + "/" + LABELS_JSON
-MODEL_PATH = "CCAiM_V0_0_1.pth"
-MODEL_PATH = "models/" + MODEL_PATH
+MODEL_PATH = "CCAiM_V0_0_2.pth"
+MODEL_PATH = "../models/" + MODEL_PATH
 NUM_CLASSES = 10
 BATCH_SIZE = 16
 EPOCHS = 10
-LR = 0.001
+LR = 0.00001
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # data set class

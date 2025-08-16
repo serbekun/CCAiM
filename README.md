@@ -53,8 +53,10 @@ now can
 
 ### models list
 - v_0.0.1   # first model learned by 22 photo.
+- v_0.0.2   # second model lerned by 41 photo
 
 ## 🤝 How to Contribute
 
 - The most helpful contribution at the moment:
 If you find a discrepancy between the cloud class specified in the JSON label and the actual image content, correcting it will greatly improve dataset quality.
+\

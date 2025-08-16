@@ -10,7 +10,7 @@ import os
 from model import CCAiMModel  # model architecture
 
 # setting
-MODEL_PATH = "CCAiM_V0_0_1.pth"
+MODEL_PATH = "CCAiM_V0_0_2.pth"
 MODEL_PATH = "../models/" + MODEL_PATH
 LABELS_JSON = "labels.json"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
