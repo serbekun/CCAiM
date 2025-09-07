@@ -53,7 +53,8 @@ now can
 
 ### models list
 - v_0.0.1   # first model learned by 23 photo.
-- v_0.0.2   # second model lerned by 42 photo
+- v_0.0.2   # second model learned by 42 photo
+- v_0.0.3   # model learned by 88 photo
 
 ## 🤝 How to Contribute
 
