@@ -1,7 +1,7 @@
 # CCAiM – Cloud Classification AI Model
 
 <div align="center">
-  <img src="assets/logo.jpg" alt="CCAiM logo" width="300">
+  <img src="assets/logo.png" alt="CCAiM logo" width="300">
 </div> 
 
 ## 📌 Project Status
@@ -60,3 +60,4 @@ now can
 
 - The most helpful contribution at the moment:
 If you find a discrepancy between the cloud class specified in the JSON label and the actual image content, correcting it will greatly improve dataset quality.
+
