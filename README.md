@@ -6,7 +6,7 @@
 
 ## 📌 Project Status
 
-Currently in the dataset collection phase.
+Currently in the collection dataset in [Hugging face](https://huggingface.co/datasets/serbekun/CCAiM-CloudsDataset) phase.
 
 ## 🎯 Project Goal
 
@@ -60,4 +60,5 @@ now can
 
 - The most helpful contribution at the moment:
 If you find a discrepancy between the cloud class specified in the JSON label and the actual image content, correcting it will greatly improve dataset quality.
+
 
