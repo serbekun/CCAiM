@@ -55,6 +55,7 @@ now can
 - v_0.0.1   # first model learned by 23 photo.
 - v_0.0.2   # second model learned by 42 photo
 - v_0.0.3   # model learned by 88 photo
+- v_0.0.4   # model learned by 165 photo
 
 ## 🤝 How to Contribute
 

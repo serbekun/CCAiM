@@ -13,7 +13,7 @@ from model import CCAiMModel  # file with architecture
 # setting
 DATA_DIR = "../data/clouds_1"
 LABELS_JSON = "labels.json"
-MODEL_PATH = "CCAiM_V0_0_3.pth"
+MODEL_PATH = "CCAiM_V0_0_4.pth"
 MODEL_PATH = "../models/" + MODEL_PATH
 NUM_CLASSES = 10
 BATCH_SIZE = 16
