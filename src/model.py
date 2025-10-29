@@ -16,7 +16,7 @@ class ConvBlock(nn.Module):
 
 class CCAiMModel(nn.Module):
     """
-    Compact convolutional classifier aimed to be ~9M parameters by default.
+    Compact convolutional classifier aimed to be 9,907,530 parameters by default.
 
     Structure (default channels):
       stem: 3 -> 64
@@ -31,9 +31,9 @@ class CCAiMModel(nn.Module):
 
     def __init__(self, num_classes: int = 10, width_mult: int = 1):
         super().__init__()
-        # Base channel configuration chosen to target ~9M params
+        # Base channel configuration chosen to target 9,907,530 params
         base_channels = [64, 128, 256, 512, 512]
-        # allow simple integer width multiplier (1 keeps ~9M params)
+        # allow simple integer width multiplier (1 keeps 9,907,530 params)
         if width_mult != 1:
             base_channels = [max(8, int(c * width_mult)) for c in base_channels]
 
