@@ -4,6 +4,9 @@
   <img src="assets/logo.png" alt="CCAiM logo" width="300">
 </div> 
 
+## project links
+CCAiM hugging face [collection](https://hf.co/collections/serbekun/ccaim) 🤗
+
 ## 📌 Project Status
 
 Currently in the dataset collection phase.
