@@ -26,7 +26,7 @@ def main():
         print(f"[Error] file {LABELS_JSON} not found!")
         return
 
-    total_images = len(labels) - 1
+    total_images = len(labels)
 
     report_lines = []
     report_lines.append(f"statistic dataset ({LABELS_JSON})")

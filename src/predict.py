@@ -10,7 +10,7 @@ import os
 from model import CCAiMModel  # model architecture
 
 # setting
-MODEL_PATH = "CCAiM_V0_0_4.pth"
+MODEL_PATH = "CCAiM_V0_0_5.pth"
 MODEL_PATH = "../models/" + MODEL_PATH
 LABELS_JSON = "labels.json"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -25,26 +25,35 @@ if not os.path.exists(image_path):
     print(f"[Error] fail {image_path} not found.")
     sys.exit(1)
 
-# load label
-with open(LABELS_JSON, "r") as f:
-    labels_data = json.load(f)
-
-# collect special class
-classes = sorted(set(labels_data.values()))
-
-# model
-model = CCAiMModel(num_classes=len(classes)).to(DEVICE)
-
 if not os.path.exists(MODEL_PATH):
     print(f"[Error] model file {MODEL_PATH} not found.")
     sys.exit(1)
 
-model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
+checkpoint = torch.load(MODEL_PATH, map_location=DEVICE)
+
+# class names must come from the checkpoint: rebuilding them any other way
+# (e.g. sorting labels.json values) can mismatch the training index order
+if isinstance(checkpoint, dict) and "classes" in checkpoint:
+    classes = checkpoint["classes"]
+    state_dict = checkpoint["model_state_dict"]
+else:
+    # old checkpoint without class names: fall back to labels.json,
+    # ordered by its index keys ("0", "1", ...), not alphabetically
+    print(f"[WARN] checkpoint has no class list, falling back to {LABELS_JSON}")
+    with open(LABELS_JSON, "r") as f:
+        labels_data = json.load(f)
+    classes = [labels_data[str(i)] for i in range(len(labels_data))]
+    state_dict = checkpoint
+
+# model
+model = CCAiMModel(num_classes=len(classes)).to(DEVICE)
+model.load_state_dict(state_dict)
 model.eval()
 
 # transform image (must match val_transform used during training)
 transform = transforms.Compose([
-    transforms.Resize((224, 224)),
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406],
                          std=[0.229, 0.224, 0.225]),

@@ -4,46 +4,58 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
-from PIL import Image
-import json
+from datasets import load_dataset
 import os
 
 from model import CCAiMModel  # file with architecture
 
 # setting
-DATA_DIR = "../data/clouds_1"
-LABELS_JSON = "labels.json"
-MODEL_PATH = "CCAiM_V0_0_4.pth"
+HF_DATASET = "serbekun/CCAiM-CloudsDataset"
+MODEL_PATH = "CCAiM_V0_0_5.pth"
 MODEL_PATH = "../models/" + MODEL_PATH
-NUM_CLASSES = 10
 BATCH_SIZE = 16
 EPOCHS = 100
 LR = 0.001
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+WEIGHT_DECAY = 1e-4
+EARLY_STOP_PATIENCE = 15  # stop if val loss hasn't improved for this many epochs
+SEED = 42
 
-# data set class
+torch.manual_seed(SEED)
+def pick_device():
+    # Use CUDA only if the installed torch build has a compatible cubin for this
+    # GPU; otherwise CUDA ops fail at runtime, so fall back to CPU. A cubin built
+    # for sm_{major}{m} runs on a device sm_{major}{minor} as long as m <= minor
+    # (same major, equal-or-lower minor), so we don't require an exact match.
+    if torch.cuda.is_available():
+        major, minor = torch.cuda.get_device_capability()
+
+        def parse(arch):  # "sm_86" -> (8, 6); "sm_100" -> (10, 0)
+            n = arch[len("sm_"):]
+            return int(n[:-1]), int(n[-1])
+
+        for arch in torch.cuda.get_arch_list():
+            a_major, a_minor = parse(arch)
+            if a_major == major and a_minor <= minor:
+                return torch.device("cuda")
+        print(f"[WARN] GPU (sm_{major}{minor}) not supported by this PyTorch build; using CPU")
+    return torch.device("cpu")
+
+DEVICE = pick_device()
+print(f"[INFO] using device: {DEVICE}")
+
+# data set class (wraps a Hugging Face split with image/label columns)
 class CloudDataset(Dataset):
-    def __init__(self, data_dir, labels_json, transform=None):
-        self.data_dir = data_dir
+    def __init__(self, hf_split, transform=None):
+        self.ds = hf_split
         self.transform = transform
-        with open(labels_json, "r") as f:
-            self.labels = json.load(f)
-        self.files = list(self.labels.keys())
-
-        # mapping class index
-        classes = sorted(set(self.labels.values()))
-        self.class_to_idx = {cls: idx for idx, cls in enumerate(classes)}
 
     def __len__(self):
-        return len(self.files)
+        return len(self.ds)
 
     def __getitem__(self, idx):
-        filename = f"{self.files[idx]}.jpg"
-        img_path = os.path.join(self.data_dir, filename)
-        image = Image.open(img_path).convert("RGB")
-
-        label_str = self.labels[self.files[idx]]
-        label = self.class_to_idx[label_str]
+        row = self.ds[idx]
+        image = row["image"].convert("RGB")  # PIL image from HF
+        label = row["label"]                 # already an int (ClassLabel)
 
         if self.transform:
             image = self.transform(image)
@@ -79,17 +91,28 @@ train_transform = transforms.Compose([
 ])
 
 val_transform = transforms.Compose([
-    transforms.Resize((224, 224)),
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
     transforms.ToTensor(),
     NORMALIZE,
 ])
 
 
+# load the Hugging Face dataset (cached locally by data/download.py)
+hf_split = load_dataset(HF_DATASET)["train"]
+CLASSES = hf_split.features["label"].names
+NUM_CLASSES = len(CLASSES)
+
 # data set and loader (base dataset returns raw PIL images; subsets add transforms)
-dataset = CloudDataset(DATA_DIR, LABELS_JSON, transform=None)
+# the split must be deterministic: on resume, a reshuffled split would leak
+# already-trained images into the validation set
+dataset = CloudDataset(hf_split, transform=None)
 train_size = int(0.8 * len(dataset))
 val_size = len(dataset) - train_size
-train_subset, val_subset = torch.utils.data.random_split(dataset, [train_size, val_size])
+train_subset, val_subset = torch.utils.data.random_split(
+    dataset, [train_size, val_size],
+    generator=torch.Generator().manual_seed(SEED),
+)
 
 train_dataset = TransformedSubset(train_subset, transform=train_transform)
 val_dataset = TransformedSubset(val_subset, transform=val_transform)
@@ -102,14 +125,20 @@ model = CCAiMModel(num_classes=NUM_CLASSES).to(DEVICE)
 
 if os.path.exists(MODEL_PATH):
     print(f"[INFO] loading model from {MODEL_PATH}")
-    model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
+    checkpoint = torch.load(MODEL_PATH, map_location=DEVICE)
+    if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint:
+        model.load_state_dict(checkpoint["model_state_dict"])
+    else:  # old checkpoints are a bare state_dict
+        model.load_state_dict(checkpoint)
 else:
     print("[INFO] creating new model")
 
-# class imbalance: inverse-frequency weights computed from the dataset
+# class imbalance: inverse-frequency weights computed from the train split only,
+# so no information about the validation set leaks into the loss
+all_labels = hf_split["label"]
 class_counts = [0] * NUM_CLASSES
-for f in dataset.files:
-    class_counts[dataset.class_to_idx[dataset.labels[f]]] += 1
+for idx in train_subset.indices:
+    class_counts[all_labels[idx]] += 1
 
 class_weights = torch.tensor(
     [1.0 / c if c > 0 else 0.0 for c in class_counts],
@@ -120,10 +149,11 @@ class_weights = class_weights / class_weights.sum() * NUM_CLASSES
 class_weights = class_weights.to(DEVICE)
 
 criterion = nn.CrossEntropyLoss(weight=class_weights)
-optimizer = optim.Adam(model.parameters(), lr=LR)
+optimizer = optim.Adam(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
 
 
 best_val_loss = float("inf")
+epochs_without_improvement = 0
 
 for epoch in range(EPOCHS):
     model.train()
@@ -167,5 +197,16 @@ for epoch in range(EPOCHS):
 
     if val_loss < best_val_loss:
         best_val_loss = val_loss
-        torch.save(model.state_dict(), MODEL_PATH)
+        epochs_without_improvement = 0
+        # store the class list with the weights so predict.py maps output
+        # neurons to the exact names/order used in training
+        torch.save({
+            "model_state_dict": model.state_dict(),
+            "classes": CLASSES,
+        }, MODEL_PATH)
         print(f"[INFO] model saved (Val Loss became best: {best_val_loss:.4f})")
+    else:
+        epochs_without_improvement += 1
+        if epochs_without_improvement >= EARLY_STOP_PATIENCE:
+            print(f"[INFO] early stopping: no val loss improvement for {EARLY_STOP_PATIENCE} epochs")
+            break
