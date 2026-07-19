@@ -1,29 +1,34 @@
 # predict_ccaim.py
 import torch
-import torch.nn as nn
-from torchvision import transforms
 from PIL import Image
 import json
 import sys
 import os
 
-from model import CCAiMModel  # model architecture
+from model import CCAiMModel  # model architecture (scratch line)
+from common import build_resnet18, val_transform
 
 # setting
-MODEL_PATH = "CCAiM_V0_0_5.pth"
+MODEL_PATH = "CCAiM_R18_V0_0_5.pth"
 MODEL_PATH = "../models/" + MODEL_PATH
 LABELS_JSON = "labels.json"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# argument check
-if len(sys.argv) != 2:
-    print(f"Use: python {sys.argv[0]} <path/to/image>")
+# argument check (model path is optional: default is the scratch line)
+if len(sys.argv) not in (2, 3):
+    print(f"Use: python {sys.argv[0]} <path/to/image> [path/to/model.pth]")
     sys.exit(1)
 
 image_path = sys.argv[1]
 if not os.path.exists(image_path):
     print(f"[Error] fail {image_path} not found.")
     sys.exit(1)
+
+if len(sys.argv) == 3:
+    MODEL_PATH = sys.argv[2]
+    if not os.path.exists(MODEL_PATH):
+        # bare filename: look it up in the models directory
+        MODEL_PATH = "../models/" + sys.argv[2]
 
 if not os.path.exists(MODEL_PATH):
     print(f"[Error] model file {MODEL_PATH} not found.")
@@ -45,19 +50,20 @@ else:
     classes = [labels_data[str(i)] for i in range(len(labels_data))]
     state_dict = checkpoint
 
-# model
-model = CCAiMModel(num_classes=len(classes)).to(DEVICE)
+# model: pick the architecture by the checkpoint "arch" field (R18 line saves
+# it) or by the R18 filename prefix; everything else is the scratch line
+is_resnet = (isinstance(checkpoint, dict) and checkpoint.get("arch") == "resnet18") \
+    or "R18" in os.path.basename(MODEL_PATH)
+if is_resnet:
+    model = build_resnet18(len(classes), pretrained=False).to(DEVICE)
+else:
+    model = CCAiMModel(num_classes=len(classes)).to(DEVICE)
 model.load_state_dict(state_dict)
 model.eval()
 
-# transform image (must match val_transform used during training)
-transform = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(224),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                         std=[0.229, 0.224, 0.225]),
-])
+# transform image: val_transform from common.py, the exact transform both
+# lines use for validation (ImageNet normalization is shared)
+transform = val_transform
 
 # load and transform
 image = Image.open(image_path).convert("RGB")
