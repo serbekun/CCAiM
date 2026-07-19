@@ -21,6 +21,9 @@ EPOCHS = 100
 LR = 0.00001
 WEIGHT_DECAY = 1e-4
 EARLY_STOP_PATIENCE = 15  # stop if val loss hasn't improved for this many epochs
+LR_DECAY_FACTOR = 0.5     # multiply LR by this when val loss plateaus
+LR_DECAY_PATIENCE = 5     # epochs without val loss improvement before decaying LR
+MIN_LR = 1e-7             # don't decay below this
 
 torch.manual_seed(SEED)
 
@@ -55,6 +58,12 @@ class_weights = compute_class_weights(hf_split, train_subset, NUM_CLASSES).to(DE
 
 criterion = nn.CrossEntropyLoss(weight=class_weights)
 optimizer = optim.Adam(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
+# gradually lower LR when val loss stops improving (patience is shorter than
+# EARLY_STOP_PATIENCE so LR gets reduced before training is stopped)
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+    optimizer, mode="min", factor=LR_DECAY_FACTOR,
+    patience=LR_DECAY_PATIENCE, min_lr=MIN_LR,
+)
 
 
 best_val_loss = float("inf")
@@ -105,7 +114,10 @@ for epoch in range(EPOCHS):
     cm = confusion_matrix(val_true, val_pred, NUM_CLASSES)
     val_f1 = macro_f1(cm)
 
-    print(f"Epoch [{epoch+1}/{EPOCHS}] | Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.2f}% | Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.2f}% | Val Macro-F1: {val_f1:.3f}")
+    scheduler.step(val_loss)
+    current_lr = optimizer.param_groups[0]["lr"]
+
+    print(f"Epoch [{epoch+1}/{EPOCHS}] | Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.2f}% | Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.2f}% | Val Macro-F1: {val_f1:.3f} | LR: {current_lr:.2e}")
 
     if val_loss < best_val_loss:
         best_val_loss = val_loss

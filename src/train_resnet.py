@@ -31,6 +31,9 @@ HEAD_LR = 0.001
 FINE_TUNE_LR = 0.00001   # very small: large steps destroy pretrained features
 WEIGHT_DECAY = 1e-4
 EARLY_STOP_PATIENCE = 10  # stop a phase if val loss hasn't improved for this many epochs
+LR_DECAY_FACTOR = 0.5     # multiply LR by this when val loss plateaus
+LR_DECAY_PATIENCE = 3     # epochs without val loss improvement before decaying LR
+MIN_LR = 1e-7             # don't decay below this
 FINE_TUNE = "--no-finetune" not in sys.argv
 
 torch.manual_seed(SEED)
@@ -73,6 +76,13 @@ def train_phase(phase_name, epochs, optimizer):
     # checkpoint if it actually beats the best result of phase 1
     global best_val_loss, best_cm
     epochs_without_improvement = 0
+    # gradually lower LR when val loss plateaus (patience is shorter than
+    # EARLY_STOP_PATIENCE so LR gets reduced before the phase is stopped);
+    # each phase gets its own scheduler since it gets its own optimizer
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, mode="min", factor=LR_DECAY_FACTOR,
+        patience=LR_DECAY_PATIENCE, min_lr=MIN_LR,
+    )
 
     for epoch in range(epochs):
         model.train()
@@ -118,7 +128,10 @@ def train_phase(phase_name, epochs, optimizer):
         cm = confusion_matrix(val_true, val_pred, NUM_CLASSES)
         val_f1 = macro_f1(cm)
 
-        print(f"[{phase_name}] Epoch [{epoch+1}/{epochs}] | Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.2f}% | Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.2f}% | Val Macro-F1: {val_f1:.3f}")
+        scheduler.step(val_loss)
+        current_lr = optimizer.param_groups[0]["lr"]
+
+        print(f"[{phase_name}] Epoch [{epoch+1}/{epochs}] | Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.2f}% | Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.2f}% | Val Macro-F1: {val_f1:.3f} | LR: {current_lr:.2e}")
 
         if val_loss < best_val_loss:
             best_val_loss = val_loss
