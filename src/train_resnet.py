@@ -16,10 +16,10 @@ from torch.utils.data import DataLoader
 import os
 import sys
 
-from common import (SEED, pick_device, TransformedSubset, train_transform,
+from common import (SEED, TransformedSubset, train_transform,
                     val_transform, load_split, compute_class_weights,
                     build_resnet18, confusion_matrix, macro_f1,
-                    print_val_report)
+                    print_val_report, print_startup_banner, format_lr)
 
 # setting
 MODEL_PATH = "CCAiM_R18_V0_0_5.pth"  # R18 prefix keeps this line separate from scratch weights
@@ -38,13 +38,17 @@ FINE_TUNE = "--no-finetune" not in sys.argv
 
 torch.manual_seed(SEED)
 
-DEVICE = pick_device()
-print(f"[INFO] using device: {DEVICE}")
-
 # load the Hugging Face dataset and the deterministic train/val split
 # (shared with the scratch line so both lines are comparable)
 hf_split, CLASSES, train_subset, val_subset = load_split()
 NUM_CLASSES = len(CLASSES)
+
+# banner reports both phases' budgets: total epochs and both learning rates
+TOTAL_EPOCHS = HEAD_EPOCHS + (FINE_TUNE_EPOCHS if FINE_TUNE else 0)
+IF_FINE_TUNE = f" / {format_lr(FINE_TUNE_LR)} (finetune)" if FINE_TUNE else ""
+LR_LABEL = f"{format_lr(HEAD_LR)} (head){IF_FINE_TUNE}"
+DEVICE = print_startup_banner("train_resnet", NUM_CLASSES, BATCH_SIZE,
+                              TOTAL_EPOCHS, LR_LABEL)
 
 train_dataset = TransformedSubset(train_subset, transform=train_transform)
 val_dataset = TransformedSubset(val_subset, transform=val_transform)

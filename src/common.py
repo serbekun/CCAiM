@@ -2,6 +2,12 @@
 # code shared by both training lines (scratch train.py and train_resnet.py)
 # so the dataset, train/val split, transforms and metrics stay identical
 # and the two lines are directly comparable
+import os
+import sys
+import time
+import atexit
+import datetime
+
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
@@ -9,6 +15,114 @@ from torchvision import transforms
 # setting shared by both lines
 HF_DATASET = "serbekun/CCAiM-CloudsDataset"
 SEED = 42  # fixed for both lines: same split -> comparable val metrics
+MODEL_LINES = "scratch (CCAiMModel) + resnet18 (ImageNet head start)"
+
+# training runs are saved here (repo-root/logs); anchored to this file so the
+# path doesn't depend on the working directory the script is launched from
+LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "logs")
+
+# best-effort memory type per GPU name (torch doesn't expose it); unknown
+# cards simply omit the memory type instead of guessing
+GPU_MEMORY_TYPE = {
+    "Quadro P2200": "GDDR5X",
+    "Quadro P2000": "GDDR5",
+    "Tesla T4": "GDDR6",
+    "Tesla V100": "HBM2",
+    "GeForce GTX 1080 Ti": "GDDR5X",
+}
+
+# compute capability major -> architecture family name
+GPU_ARCH = {
+    5: "Maxwell", 6: "Pascal", 7: "Volta/Turing/Ampere",
+    8: "Ampere/Ada", 9: "Hopper", 10: "Blackwell", 12: "Blackwell",
+}
+
+
+class _Tee:
+    """Write to several streams at once (terminal + log file)."""
+
+    def __init__(self, *streams):
+        self._streams = streams
+
+    def write(self, data):
+        for stream in self._streams:
+            stream.write(data)
+            stream.flush()
+
+    def flush(self):
+        for stream in self._streams:
+            stream.flush()
+
+
+def format_lr(lr):
+    # 0.00001 -> "1e-5", 0.001 -> "1e-3" (drop the zero-padded exponent)
+    mantissa, exp = f"{lr:.0e}".split("e")
+    return f"{mantissa}e{int(exp)}"
+
+
+def format_duration(seconds):
+    # 3725 -> "1h 02m 05s"
+    seconds = int(seconds)
+    hours, rem = divmod(seconds, 3600)
+    minutes, secs = divmod(rem, 60)
+    if hours:
+        return f"{hours}h {minutes:02d}m {secs:02d}s"
+    if minutes:
+        return f"{minutes}m {secs:02d}s"
+    return f"{secs}s"
+
+
+def print_startup_banner(script_name, num_classes, batch_size, epochs, lr,
+                         image_size=224):
+    """Print the environment/config banner and tee the whole run into a log file.
+
+    Must be called after load_split() so the class count is known; returns the
+    picked device so the caller doesn't call pick_device()/print it again.
+    """
+    os.makedirs(LOG_DIR, exist_ok=True)
+    stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_path = os.path.join(LOG_DIR, f"{script_name}_{stamp}.log")
+    log_file = open(log_path, "a", encoding="utf-8")
+    # keep a handle on the original stdout; everything printed from here on
+    # goes to the terminal and to the log file
+    sys.stdout = _Tee(sys.__stdout__, log_file)
+
+    device = pick_device()
+
+    if device.type == "cuda":
+        props = torch.cuda.get_device_properties(0)
+        name = torch.cuda.get_device_name(0)
+        mem_gb = props.total_memory / (1024 ** 3)
+        mem_type = GPU_MEMORY_TYPE.get(name)
+        mem_part = f"{mem_gb:.0f} GB" + (f" {mem_type}" if mem_type else "")
+        arch = GPU_ARCH.get(props.major, "unknown")
+        gpu = f"{name} — {mem_part}, {arch} (sm_{props.major}{props.minor})"
+    else:
+        gpu = "no CUDA GPU (running on CPU)"
+
+    py_ver = f"{sys.version_info.major}.{sys.version_info.minor}"
+    torch_ver = torch.__version__.split("+")[0]
+    cuda_ver = getattr(getattr(torch, "version", None), "cuda", None)
+    build = f"cu{cuda_ver.replace('.', '')}" if cuda_ver else "cpu"
+    lr_label = format_lr(lr) if isinstance(lr, (int, float)) else lr
+
+    print(f"[INFO] using device: {device}")
+    print(f"[INFO] gpu   : {gpu}")
+    print(f"[INFO] env   : python {py_ver}, torch {torch_ver} ({build}), cuda {cuda_ver or 'n/a'}")
+    print(f"[INFO] data  : {HF_DATASET} — {num_classes} classes")
+    print(f"[INFO] cfg   : {image_size}x{image_size}, batch {batch_size}, "
+          f"epochs {epochs}, lr {lr_label}, seed {SEED}")
+    print(f"[INFO] lines : {MODEL_LINES}")
+    print(f"[INFO] log   : {os.path.relpath(log_path)}")
+
+    # report total time at interpreter shutdown: this runs both on normal
+    # completion and on Ctrl+C (KeyboardInterrupt), and the tee above makes
+    # sure the line lands in the log file too
+    start = time.time()
+    atexit.register(lambda: print(
+        f"[INFO] training time: {format_duration(time.time() - start)}"))
+
+    return device
 
 
 def pick_device():

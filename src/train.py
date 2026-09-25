@@ -9,9 +9,10 @@ from torch.utils.data import DataLoader
 import os
 
 from model import CCAiMModel  # file with architecture
-from common import (SEED, pick_device, TransformedSubset, train_transform,
+from common import (SEED, TransformedSubset, train_transform,
                     val_transform, load_split, compute_class_weights,
-                    confusion_matrix, macro_f1, print_val_report)
+                    confusion_matrix, macro_f1, print_val_report,
+                    print_startup_banner)
 
 # setting
 MODEL_PATH = "CCAiM_V0_0_5.pth"
@@ -27,13 +28,12 @@ MIN_LR = 1e-7             # don't decay below this
 
 torch.manual_seed(SEED)
 
-DEVICE = pick_device()
-print(f"[INFO] using device: {DEVICE}")
-
 # load the Hugging Face dataset and the deterministic train/val split
 # (shared with the ResNet18 line so both lines are comparable)
 hf_split, CLASSES, train_subset, val_subset = load_split()
 NUM_CLASSES = len(CLASSES)
+
+DEVICE = print_startup_banner("train", NUM_CLASSES, BATCH_SIZE, EPOCHS, LR)
 
 train_dataset = TransformedSubset(train_subset, transform=train_transform)
 val_dataset = TransformedSubset(val_subset, transform=val_transform)
