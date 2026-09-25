@@ -163,6 +163,8 @@ train_phase("head", HEAD_EPOCHS, optimizer)
 
 # phase 2 (optional): unfreeze the top block, fine-tune with a tiny LR
 if FINE_TUNE:
+    checkpoint = torch.load(MODEL_PATH, map_location=DEVICE)
+    model.load_state_dict(checkpoint["model_state_dict"])
     for param in model.layer4.parameters():
         param.requires_grad = True
     optimizer = optim.Adam(
