@@ -86,6 +86,14 @@ cd src && python3 train_resnet.py
 cd src && python3 train_resnet.py --no-finetune
 ```
 
+To train both lines back to back (ResNet18 first, then the scratch baseline), run from the repository root:
+
+```bash
+./run_training.sh
+# extra arguments are forwarded to train_resnet.py, e.g.
+./run_training.sh --no-finetune
+```
+
 Inference works with both lines — the architecture is detected from the checkpoint:
 
 ```bash
@@ -111,6 +119,7 @@ Model weights are not stored in this repository (`*.pth` is gitignored) — all 
 ## Repository Layout
 
 ```
+run_training.sh  trains both lines: train_resnet.py, then train.py
 src/          training, evaluation, inference, dataset stats
   common.py       shared: dataset, split, transforms, metrics, banner/log/report
   model.py        CCAiMModel architecture (scratch line)
