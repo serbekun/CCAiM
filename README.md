@@ -13,7 +13,7 @@ CCAiM aims to develop an AI-powered model for classifying clouds based on ground
 
 ## Project Status
 
-Dataset collection + training, both model lines alive. The current published model is **V0.0.6** (ResNet18 line): **50.34%** validation accuracy and **macro-F1 0.390** on 916 labelled photos.
+Dataset collection + training, both model lines alive. The current published model is **V0.0.7** (ResNet18 line): **54.36%** validation accuracy and **macro-F1 0.423** on 971 labelled photos.
 
 Not impressive numbers on their own — cloud classes are visually ambiguous and the dataset is small and unbalanced. The point of the project is an honest, reproducible baseline and a dataset that keeps growing, not a leaderboard score.
 
@@ -21,12 +21,14 @@ Not impressive numbers on their own — cloud classes are visually ambiguous and
 
 Validation metrics on the fixed seed-42 split (same split and metrics for both lines, so they are directly comparable):
 
-| Model | Val accuracy | Macro-F1 |
-| --- | --- | --- |
-| ResNet18 V0.0.6 | 50.34% | 0.390 |
-| ResNet18 V0.0.5 | 42.95% | 0.314 |
-| scratch V0.0.6 | 35.57% | 0.237 |
-| scratch V0.0.5 | 27.52% | 0.123 |
+|Model         |Accuracy  |Macro-F1 |
+|--------------|----------|---------|
+|V0.0.5 scratch|27.52%    |0.123    |
+|V0.0.7 scratch|35.38%    |0.227    |
+|V0.0.6 scratch|35.57%    |0.237    |
+|R18 V0.0.5    |42.95%    |0.314    |
+|R18 V0.0.6    |50.34%    |0.390    |
+|**R18 V0.0.7**|**54.36%**|**0.423**|
 
 ## Two Model Lines
 
@@ -35,7 +37,8 @@ The project trains two separate model lines on the same data, split and metrics:
 - **scratch line** (`src/train.py`, weights `CCAiM_V0_0_X.pth`) — the compact `CCAiMModel` CNN trained from scratch (~9.9M parameters). This is the project baseline: it measures the contribution of dataset growth, so its results are only compared against earlier scratch versions.
 - **ResNet18 line** (`src/train_resnet.py`, weights `CCAiM_R18_V0_0_X.pth`) — transfer learning from ImageNet-pretrained ResNet18, trained in two phases: the new head first (backbone frozen), then an optional fine-tune of `layer4` with a tiny LR. This is the practical line for maximum accuracy and the future API / web demo.
 
-> ⚠️ Note: the accuracy gain of the ResNet18 line comes from ImageNet pretraining — it is a one-time head start, **not** a result of dataset growth. Project progress is still measured by the scratch line and by dataset expansion.
+> [!WARNING]
+> the accuracy gain of the ResNet18 line comes from ImageNet pretraining — it is a one-time head start, **not** a result of dataset growth. Project progress is still measured by the scratch line and by dataset expansion.
 
 Both lines share `src/common.py`: same fixed seed, same 80/20 train/val split, same class-weighted loss (inverse frequency, computed from the train split only), same transforms (224×224, random crop / flips / color jitter for training, resize + center crop for validation), and the same report — confusion matrix, per-class recall and macro-F1. Each run prints a startup banner and tees everything into a timestamped log under `logs/`, with a total training time at the end.
 
@@ -60,7 +63,7 @@ All data lives on Hugging Face: **[serbekun/CCAiM-CloudsDataset](https://hugging
 
 ## Training Hardware
 
-Everything runs locally, no Colab and no rented GPU — on the home server **node3** (Arch Linux):
+Everything runs locally, no Colab and no rented GPU — on the home server that i call **node3** (Arch Linux) <- Arch Linux BTW:
 
 - **GPU** NVIDIA Quadro P2200 — 5 GB GDDR5X, Pascal (`sm_61`), 1280 CUDA cores, 75 W, no tensor cores
 - **CPU** Intel Core i7-7700K — 4 cores / 8 threads @ 4.2 (4.5) GHz
@@ -110,8 +113,8 @@ Validation report (confusion matrix, per-class recall, macro-F1) for any saved m
 
 ```bash
 cd src
-python3 evaluate.py CCAiM_V0_0_6.pth
-python3 evaluate.py CCAiM_R18_V0_0_6.pth
+python3 evaluate.py CCAiM_V0_0_7.pth
+python3 evaluate.py CCAiM_R18_V0_0_7.pth
 ```
 
 Model weights are not stored in this repository (`*.pth` is gitignored) — all of them live on [Hugging Face](https://huggingface.co/serbekun/CCAiM).
