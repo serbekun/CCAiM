@@ -308,3 +308,12 @@ def print_val_report(cm, classes):
 
     accuracy = 100.0 * cm.trace().item() / cm.sum().item()
     print(f"\nval accuracy: {accuracy:.2f}% | macro-F1: {macro_f1(cm):.3f}")
+
+def build_efficientnet_b0(num_classes, pretrained):
+    """EfficientNet-B0 with the final Linear of the classifier replaced."""
+    from torchvision import models
+
+    weights = models.EfficientNet_B0_Weights.DEFAULT if pretrained else None
+    model = models.efficientnet_b0(weights=weights)
+    model.classifier[1] = torch.nn.Linear(model.classifier[1].in_features, num_classes)
+    return model
